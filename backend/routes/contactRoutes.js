@@ -23,7 +23,7 @@ router.post('/contact', async (req, res) => {
     // Save the new message to the database
     await newMessage.save();
 
-    // Send a success response back to the frontend
+    //  success response for frontend
     res.status(200).json({ success: true, message: 'Message sent successfully!' });
 
   } catch (error) {
