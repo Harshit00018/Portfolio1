@@ -47,11 +47,7 @@ dotenv.config();
 const app = express();
 
 // ✅ Enable CORS
-app.use(cors({
-  origin: "https://fluffy-mooncake-2ba848.netlify.app",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
-}));
+app.use(cors());
 
 app.use(express.json());
 
