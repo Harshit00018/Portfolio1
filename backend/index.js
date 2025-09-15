@@ -36,70 +36,59 @@
 // app.listen(PORT, () => {
 //     console.log(`Server is running on port ${PORT}`);
 // });
+// backend/api/index.js
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 5000;
 
-// cors used globally 
-app.use(cors());
+const app = express();
+
+// ✅ Enable CORS
+app.use(cors({
+  origin: "https://fluffy-mooncake-2ba848.netlify.app",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
 
 app.use(express.json());
 
-// connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+// ✅ DB connection (connect once)
+if (!mongoose.connection.readyState) {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("MongoDB connected"))
+    .catch(err => console.error(err));
+}
 
-// Message model (schema)
+// ✅ Schema & Model
 const messageSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  message: { type: String, required: true },
+  name: String,
+  email: String,
+  message: String,
   createdAt: { type: Date, default: Date.now }
 });
+const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
 
-const Message = mongoose.model("Message", messageSchema);
-
-// Root route
+// ✅ Routes
 app.get("/", (req, res) => {
-  res.send("Portfolio Backend API is running!");
+  res.send("API is running");
 });
 
-// Contact POST route (save message)
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
-    if (!name || !email || !message) {
-      return res.status(400).json({ success: false, message: "Provide name, email, and message." });
-    }
+    if (!name || !email || !message)
+      return res.status(400).json({ success: false, message: "All fields are required" });
 
-    const newMsg = new Message({ name, email, message });
-    await newMsg.save();
-
-    res.status(200).json({ success: true, message: "Message saved successfully!" });
+    await Message.create({ name, email, message });
+    res.json({ success: true, message: "Message saved successfully!" });
   } catch (err) {
-    console.error("Error on /api/contact:", err);
-    res.status(500).json({ success: false, message: "Internal server error." });
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// Admin GET route to fetch all messages
-// You might later protect this route (auth etc.), but for now simple read-only.
-app.get("/api/messages", async (req, res) => {
-  try {
-    const messages = await Message.find().sort({ createdAt: -1 }); // newest first
-    res.json({ success: true, data: messages });
-  } catch (err) {
-    console.error("Error on /api/messages:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch messages." });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// ✅ Export as serverless function
+export default app;
