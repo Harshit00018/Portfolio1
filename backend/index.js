@@ -45,14 +45,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Replace this with your actual frontend URL from Netlify
-const FRONTEND_ORIGIN = "https://68c599a4613446414f2d7207--calm-croquembouche-1674bc.netlify.app";
-
-app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// cors used globally 
+app.use(cors());
 
 app.use(express.json());
 
