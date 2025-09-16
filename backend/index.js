@@ -47,7 +47,13 @@ dotenv.config();
 const app = express();
 
 // ✅ Enable CORS
-app.use(cors());
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL],
+    methods: ["POST"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
